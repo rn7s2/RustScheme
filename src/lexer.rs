@@ -8,6 +8,7 @@ pub enum Number {
     Float(f64),
 }
 
+#[derive(PartialEq)]
 pub struct Symbol(pub String);
 
 pub enum Atomic {
@@ -28,15 +29,6 @@ pub enum Sexpr {
     Cons(Cons),
 }
 
-pub enum Value {
-    Void,
-    Bool(Boolean),
-    Number(Number),
-    String(String),
-    Quote(Box<Sexpr>),
-    Lambda,
-}
-
 pub fn format_sexpr(value: &Sexpr) -> String {
     match value {
         Sexpr::Atomic(v) => match v {
@@ -54,4 +46,18 @@ pub fn format_sexpr(value: &Sexpr) -> String {
         },
         Sexpr::Cons(c) => format!("({} . {})", format_sexpr(&*c.car), format_sexpr(&*c.cdr)),
     }
+}
+
+pub fn lex(text: String) -> Sexpr {
+    // for debugging
+    Sexpr::Cons(Cons {
+        car: Box::new(Sexpr::Atomic(Atomic::Symbol(Symbol("define".to_owned())))),
+        cdr: Box::new(Sexpr::Cons(Cons {
+            car: Box::new(Sexpr::Atomic(Atomic::Symbol(Symbol("x".to_owned())))),
+            cdr: Box::new(Sexpr::Cons(Cons {
+                car: Box::new(Sexpr::Atomic(Atomic::Number(Number::Integer(5)))),
+                cdr: Box::new(Sexpr::Atomic(Atomic::Null)),
+            })),
+        })),
+    })
 }
