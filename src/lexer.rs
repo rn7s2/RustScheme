@@ -1,63 +1,79 @@
-pub enum Boolean {
+#[derive(Clone, Copy, Debug)]
+pub enum Bool {
     True,
     False,
 }
 
+#[derive(Clone, Copy, Debug)]
 pub enum Number {
     Integer(i32),
     Float(f64),
 }
 
-#[derive(PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Symbol(pub String);
 
-pub enum Atomic {
+#[derive(Clone, Debug)]
+pub enum Atom {
     Null,
-    Boolean(Boolean),
+    Bool(Bool),
     Number(Number),
     String(String),
     Symbol(Symbol),
 }
 
+#[derive(Debug)]
 pub struct Cons {
     pub car: Box<Sexpr>,
     pub cdr: Box<Sexpr>,
 }
 
+#[derive(Debug)]
 pub enum Sexpr {
-    Atomic(Atomic),
+    Atom(Atom),
     Cons(Cons),
 }
 
 pub fn format_sexpr(value: &Sexpr) -> String {
     match value {
-        Sexpr::Atomic(v) => match v {
-            Atomic::Null => "()".to_owned(),
-            Atomic::Boolean(b) => match b {
-                Boolean::True => "#t".to_owned(),
-                Boolean::False => "#f".to_owned(),
+        Sexpr::Atom(v) => match &*v {
+            Atom::Null => "()".to_owned(),
+            Atom::Bool(b) => match b {
+                Bool::True => "#t".to_owned(),
+                Bool::False => "#f".to_owned(),
             },
-            Atomic::Number(n) => match n {
+            Atom::Number(n) => match n {
                 Number::Integer(v) => format!("{}", v),
                 Number::Float(v) => format!("{}", v),
             },
-            Atomic::String(s) => format!("{}", s),
-            Atomic::Symbol(s) => format!("{}", s.0),
+            Atom::String(s) => format!("{}", s),
+            Atom::Symbol(s) => format!("{}", s.0),
         },
         Sexpr::Cons(c) => format!("({} . {})", format_sexpr(&*c.car), format_sexpr(&*c.cdr)),
     }
 }
 
-pub fn lex(text: String) -> Sexpr {
+pub fn lex(text: String) -> Result<Sexpr, String> {
     // for debugging
-    Sexpr::Cons(Cons {
-        car: Box::new(Sexpr::Atomic(Atomic::Symbol(Symbol("define".to_owned())))),
+    let sexpr = Sexpr::Cons(Cons {
+        car: Box::new(Sexpr::Atom(Atom::Symbol(Symbol("define".to_owned())))),
         cdr: Box::new(Sexpr::Cons(Cons {
-            car: Box::new(Sexpr::Atomic(Atomic::Symbol(Symbol("x".to_owned())))),
+            car: Box::new(Sexpr::Atom(Atom::Symbol(Symbol("x".to_owned())))),
             cdr: Box::new(Sexpr::Cons(Cons {
-                car: Box::new(Sexpr::Atomic(Atomic::Number(Number::Integer(5)))),
-                cdr: Box::new(Sexpr::Atomic(Atomic::Null)),
+                car: Box::new(Sexpr::Atom(Atom::Bool(Bool::False))),
+                cdr: Box::new(Sexpr::Atom(Atom::Null)),
             })),
         })),
-    })
+    });
+
+    // let sexpr = Sexpr::Cons(Cons {
+    //     car: Box::new(Sexpr::Atom(Atom::Symbol(Symbol("f".to_owned())))),
+    //     cdr: Box::new(Sexpr::Cons(Cons {
+    //         car: Box::new(Sexpr::Atom(Atom::Number(Number::Integer(5)))),
+    //         cdr: Box::new(Sexpr::Atom(Atom::Null)),
+    //     })),
+    // });
+
+    println!("{}", format_sexpr(&sexpr));
+    Ok(sexpr)
 }
