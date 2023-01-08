@@ -49,6 +49,6 @@ fn announce_output(str: &str) {
     println!("\n{}", str);
 }
 
-fn user_print(obj: Value) {
-    print!("Value printed!");
+fn user_print(val: Value) {
+    print!("{:?}", val);
 }
