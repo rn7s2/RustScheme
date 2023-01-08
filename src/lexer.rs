@@ -10,7 +10,7 @@ pub enum Number {
     Float(f64),
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Symbol(pub String);
 
 #[derive(Clone, Debug)]
@@ -22,13 +22,13 @@ pub enum Atom {
     Symbol(Symbol),
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Cons {
     pub car: Box<Sexpr>,
     pub cdr: Box<Sexpr>,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Sexpr {
     Atom(Atom),
     Cons(Cons),
@@ -51,6 +51,19 @@ pub fn format_sexpr(value: &Sexpr) -> String {
         },
         Sexpr::Cons(c) => format!("({} . {})", format_sexpr(&*c.car), format_sexpr(&*c.cdr)),
     }
+}
+
+pub fn read_sexpr() -> Result<Sexpr, ()> {
+    Ok(Sexpr::Cons(Cons {
+        car: Box::new(Sexpr::Atom(Atom::Symbol(Symbol("define".to_owned())))),
+        cdr: Box::new(Sexpr::Cons(Cons {
+            car: Box::new(Sexpr::Atom(Atom::Symbol(Symbol("x".to_owned())))),
+            cdr: Box::new(Sexpr::Cons(Cons {
+                car: Box::new(Sexpr::Atom(Atom::Bool(Bool::False))),
+                cdr: Box::new(Sexpr::Atom(Atom::Null)),
+            })),
+        })),
+    }))
 }
 
 pub fn lex(text: String) -> Result<Sexpr, String> {

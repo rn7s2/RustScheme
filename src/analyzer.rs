@@ -1,31 +1,112 @@
-use crate::parser::Expression;
+use std::collections::HashMap;
 
-pub fn analyze(exp: Expression) {
-    todo!()
+use crate::{
+    evaluator::Env,
+    lexer::{Atom, Cons, Sexpr, Symbol},
+    parser::{Expression, SelfEval},
+};
 
-    // match exp {
-    //     Expression::SelfEval => analyze_self_application(exp),
-    //     Expression::Quoted => analyze_self_quoted(exp),
-    //     Expression::Variable => analyze_self_variable(exp),
-    //     Expression::Assignment => analyze_self_assignment(exp),
-    //     Expression::Definition => analyze_self_definition(exp),
-    //     Expression::If => analyze_self_if(exp),
-    //     Expression::Lambda => analyze_self_lambda(exp),
-    //     Expression::Begin => analyze_self_sequence(exp),
-    //     Expression::Cond => analyze(cond_to_if(exp)),
-    //     Expression::Application => analyze_self_application(exp),
-    // }
+#[derive(Clone)]
+pub enum Procedure {
+    Primitive(String),
+    Compound(Cons, Cons, Env),
 }
 
-pub fn analyze_self_evaluating(exp: Expression) {}
-pub fn analyze_self_quoted(exp: Expression) {}
-pub fn analyze_self_variable(exp: Expression) {}
-pub fn analyze_self_assignment(exp: Expression) {}
-pub fn analyze_self_definition(exp: Expression) {}
-pub fn analyze_self_if(exp: Expression) {}
-pub fn analyze_self_lambda(exp: Expression) {}
-pub fn analyze_self_sequence(exp: Expression) {}
-pub fn cond_to_if(exp: Expression) -> Expression {
+pub struct Procedure {
+    parameters: Cons,
+    body: Cons,
+    env: Env,
+}
+
+#[derive(Clone)]
+pub enum Value {
+    Atom(Atom),
+    Cons(Cons),
+    Procedure(Procedure),
+}
+
+pub fn analyze(exp: Expression) -> Box<dyn FnOnce(Env) -> Result<Value, ()>> {
+    match exp {
+        Expression::SelfEval(v) => analyze_self_evaluated(v).unwrap(),
+        Expression::Quoted(v) => analyze_quoted(v).unwrap(),
+        Expression::Variable(v) => analyze_variable(v).unwrap(),
+        Expression::Assignment(s, e) => analyze_assignment(s, e).unwrap(),
+        Expression::Definition(s, e) => analyze_definition(s, e).unwrap(),
+        Expression::If(e1, e2, e3) => analyze_if(e1, e2, e3).unwrap(),
+        Expression::Lambda(e1, e2) => analyze_lambda(e1, e2).unwrap(),
+        Expression::Begin(e) => analyze_sequence(e).unwrap(),
+        Expression::Cond(e) => analyze(cond_to_if(e).unwrap()),
+        Expression::Application(e1, e2) => analyze_application(e1, e2).unwrap(),
+    }
+}
+
+fn analyze_self_evaluated(v: SelfEval) -> Result<Box<dyn FnOnce(Env) -> Result<Value, ()>>, ()> {
+    Ok(Box::new(|env| match v {
+        SelfEval::Number(n) => Ok(Value::Atom(Atom::Number(n))),
+        SelfEval::String(s) => Ok(Value::Atom(Atom::String(s))),
+    }))
+}
+
+fn analyze_quoted(e: Sexpr) -> Result<Box<dyn FnOnce(Env) -> Result<Value, ()>>, ()> {
+    Ok(Box::new(|env| match e {
+        Sexpr::Atom(a) => Ok(Value::Atom(a)),
+        Sexpr::Cons(c) => Ok(Value::Cons(c)),
+    }))
+}
+
+fn analyze_variable(s: Symbol) -> Result<Box<dyn FnOnce(Env) -> Result<Value, ()>>, ()> {
     todo!()
 }
-pub fn analyze_self_application(exp: Expression) {}
+
+fn analyze_assignment(
+    s: Symbol,
+    e: Sexpr,
+) -> Result<Box<dyn FnOnce(Env) -> Result<Value, ()>>, ()> {
+    todo!()
+}
+
+fn analyze_definition(
+    s: Symbol,
+    e: Sexpr,
+) -> Result<Box<dyn FnOnce(Env) -> Result<Value, ()>>, ()> {
+    todo!()
+}
+
+fn analyze_if(
+    e1: Sexpr,
+    e2: Sexpr,
+    e3: Sexpr,
+) -> Result<Box<dyn FnOnce(Env) -> Result<Value, ()>>, ()> {
+    todo!()
+}
+
+fn analyze_lambda(e1: Sexpr, e2: Sexpr) -> Result<Box<dyn FnOnce(Env) -> Result<Value, ()>>, ()> {
+    Ok(Box::new(|env| {
+        Ok(Value::Procedure(Procedure {
+            parameters: match e1 {
+                Sexpr::Cons(v) => v,
+                _ => return Err(()),
+            },
+            body: match e2 {
+                Sexpr::Cons(v) => v,
+                _ => return Err(()),
+            },
+            env: env,
+        }))
+    }))
+}
+
+fn analyze_sequence(e: Sexpr) -> Result<Box<dyn FnOnce(Env) -> Result<Value, ()>>, ()> {
+    todo!()
+}
+
+fn cond_to_if(e: Sexpr) -> Result<Expression, ()> {
+    todo!()
+}
+
+fn analyze_application(
+    e1: Sexpr,
+    e2: Sexpr,
+) -> Result<Box<dyn FnOnce(Env) -> Result<Value, ()>>, ()> {
+    todo!()
+}

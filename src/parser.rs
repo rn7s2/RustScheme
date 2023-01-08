@@ -200,13 +200,13 @@ impl Sexpr {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum SelfEval {
     Number(Number),
     String(String),
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Expression {
     SelfEval(SelfEval),
     Quoted(Sexpr),
