@@ -6,10 +6,11 @@ use crate::{
     parser::Expression,
 };
 
-pub type Env = Vec<HashMap<Symbol, Value>>;
+pub type Frame = HashMap<Symbol, Value>;
+pub type Env = Vec<Frame>;
 pub const THE_EMPTY_ENV: Env = Vec::new();
 
-pub fn eval(exp: Expression, env: Env) -> Result<Value, ()> {
+pub fn eval(exp: Expression, env: &mut Env) -> Result<Value, ()> {
     analyze(exp).call_once((env,))
 }
 
@@ -17,13 +18,23 @@ pub fn apply(proc: Procedure, args: Cons) -> Result<Value, ()> {
     todo!()
 }
 
+pub fn define_variable(var: Symbol, val: Value, env: &mut Env) {
+    let frame = &mut env[0];
+    frame.insert(var, val);
+}
+
 pub fn extend_env(vals: Vec<(Symbol, Value)>, env: &Env) -> Env {
     let mut hash = HashMap::new();
     for (var, val) in vals {
         hash.insert(var, val);
     }
-    //env.append(&mut vec![hash]);
     vec![vec![hash], env.clone()].concat()
 }
 
-pub fn primitive_procs() -> Vec<(Symbol, Value)>
+pub fn primitive_procs() -> Vec<(Symbol, Value)> {
+    vec![(
+        Symbol("pair?".to_owned()),
+        Value::Procedure(Procedure::Primitive("pair?".to_owned())),
+        // ... add more primitive procedures
+    )]
+}

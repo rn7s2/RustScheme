@@ -1,31 +1,30 @@
-use std::collections::HashMap;
-
 use crate::{
     evaluator::Env,
     lexer::{Atom, Cons, Sexpr, Symbol},
     parser::{Expression, SelfEval},
 };
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Procedure {
     Primitive(String),
-    Compound(Cons, Cons, Env),
+    Compound(CompoundProcedure),
 }
 
-pub struct Procedure {
+#[derive(Clone, Debug)]
+pub struct CompoundProcedure {
     parameters: Cons,
     body: Cons,
     env: Env,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Value {
     Atom(Atom),
     Cons(Cons),
     Procedure(Procedure),
 }
 
-pub fn analyze(exp: Expression) -> Box<dyn FnOnce(Env) -> Result<Value, ()>> {
+pub fn analyze(exp: Expression) -> Box<dyn FnOnce(&mut Env) -> Result<Value, ()>> {
     match exp {
         Expression::SelfEval(v) => analyze_self_evaluated(v).unwrap(),
         Expression::Quoted(v) => analyze_quoted(v).unwrap(),
@@ -40,35 +39,37 @@ pub fn analyze(exp: Expression) -> Box<dyn FnOnce(Env) -> Result<Value, ()>> {
     }
 }
 
-fn analyze_self_evaluated(v: SelfEval) -> Result<Box<dyn FnOnce(Env) -> Result<Value, ()>>, ()> {
+fn analyze_self_evaluated(
+    v: SelfEval,
+) -> Result<Box<dyn FnOnce(&mut Env) -> Result<Value, ()>>, ()> {
     Ok(Box::new(|env| match v {
         SelfEval::Number(n) => Ok(Value::Atom(Atom::Number(n))),
         SelfEval::String(s) => Ok(Value::Atom(Atom::String(s))),
     }))
 }
 
-fn analyze_quoted(e: Sexpr) -> Result<Box<dyn FnOnce(Env) -> Result<Value, ()>>, ()> {
+fn analyze_quoted(e: Sexpr) -> Result<Box<dyn FnOnce(&mut Env) -> Result<Value, ()>>, ()> {
     Ok(Box::new(|env| match e {
         Sexpr::Atom(a) => Ok(Value::Atom(a)),
         Sexpr::Cons(c) => Ok(Value::Cons(c)),
     }))
 }
 
-fn analyze_variable(s: Symbol) -> Result<Box<dyn FnOnce(Env) -> Result<Value, ()>>, ()> {
+fn analyze_variable(s: Symbol) -> Result<Box<dyn FnOnce(&mut Env) -> Result<Value, ()>>, ()> {
     todo!()
 }
 
 fn analyze_assignment(
     s: Symbol,
     e: Sexpr,
-) -> Result<Box<dyn FnOnce(Env) -> Result<Value, ()>>, ()> {
+) -> Result<Box<dyn FnOnce(&mut Env) -> Result<Value, ()>>, ()> {
     todo!()
 }
 
 fn analyze_definition(
     s: Symbol,
     e: Sexpr,
-) -> Result<Box<dyn FnOnce(Env) -> Result<Value, ()>>, ()> {
+) -> Result<Box<dyn FnOnce(&mut Env) -> Result<Value, ()>>, ()> {
     todo!()
 }
 
@@ -76,13 +77,16 @@ fn analyze_if(
     e1: Sexpr,
     e2: Sexpr,
     e3: Sexpr,
-) -> Result<Box<dyn FnOnce(Env) -> Result<Value, ()>>, ()> {
+) -> Result<Box<dyn FnOnce(&mut Env) -> Result<Value, ()>>, ()> {
     todo!()
 }
 
-fn analyze_lambda(e1: Sexpr, e2: Sexpr) -> Result<Box<dyn FnOnce(Env) -> Result<Value, ()>>, ()> {
+fn analyze_lambda(
+    e1: Sexpr,
+    e2: Sexpr,
+) -> Result<Box<dyn FnOnce(&mut Env) -> Result<Value, ()>>, ()> {
     Ok(Box::new(|env| {
-        Ok(Value::Procedure(Procedure {
+        Ok(Value::Procedure(Procedure::Compound(CompoundProcedure {
             parameters: match e1 {
                 Sexpr::Cons(v) => v,
                 _ => return Err(()),
@@ -91,12 +95,12 @@ fn analyze_lambda(e1: Sexpr, e2: Sexpr) -> Result<Box<dyn FnOnce(Env) -> Result<
                 Sexpr::Cons(v) => v,
                 _ => return Err(()),
             },
-            env: env,
-        }))
+            env: env.clone(),
+        })))
     }))
 }
 
-fn analyze_sequence(e: Sexpr) -> Result<Box<dyn FnOnce(Env) -> Result<Value, ()>>, ()> {
+fn analyze_sequence(e: Sexpr) -> Result<Box<dyn FnOnce(&mut Env) -> Result<Value, ()>>, ()> {
     todo!()
 }
 
@@ -107,6 +111,6 @@ fn cond_to_if(e: Sexpr) -> Result<Expression, ()> {
 fn analyze_application(
     e1: Sexpr,
     e2: Sexpr,
-) -> Result<Box<dyn FnOnce(Env) -> Result<Value, ()>>, ()> {
+) -> Result<Box<dyn FnOnce(&mut Env) -> Result<Value, ()>>, ()> {
     todo!()
 }

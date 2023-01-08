@@ -5,53 +5,50 @@ mod evaluator;
 mod lexer;
 mod parser;
 
-use std::collections::HashMap;
-
-use analyzer::{analyze, Value};
-use evaluator::{eval, extend_env, Env, THE_EMPTY_ENV};
-use lexer::{format_sexpr, lex, read_sexpr, Symbol};
+use analyzer::Value;
+use evaluator::{define_variable, eval, extend_env, primitive_procs, Env, THE_EMPTY_ENV};
+use lexer::{read_sexpr, Atom, Bool, Symbol};
 use parser::parse;
 
 const INPUT_PROMPT: &str = ";;; Scheme input:";
 const OUTPUT_PROMPT: &str = ";;; Scheme value:";
 
 fn main() {
-    let global_env = setup_env();
-    driver_loop(global_env);
+    driver_loop(setup_env());
 }
 
 fn setup_env() -> Env {
     let mut init_env = extend_env(primitive_procs(), &THE_EMPTY_ENV);
-    // define_variable();
-    // define_variable();
-    // init_env
-    todo!()
+    define_variable(
+        Symbol("true".to_owned()),
+        Value::Atom(Atom::Bool(Bool::True)),
+        &mut init_env,
+    );
+    define_variable(
+        Symbol("false".to_owned()),
+        Value::Atom(Atom::Bool(Bool::False)),
+        &mut init_env,
+    );
+    init_env
 }
 
-fn driver_loop(env: Env) {
+fn driver_loop(mut env: Env) {
     loop {
         prompt_for_input(INPUT_PROMPT);
-        let mut inner_env = env.clone();
-        eval(read_sexpr().unwrap());
-
-        match read_sexpr() {
-            Ok(s) => match parse(s) {
-                Ok(e) => match eval(e, env) {
-                    Ok(v) => {
-                        announce_output(OUTPUT_PROMPT);
-                        user_print(v);
-                    }
-                    Err(_) => driver_loop(env),
-                },
-                Err(_) => driver_loop(env),
-            },
-            Err(_) => driver_loop(env),
-        }
+        let val = eval(parse(read_sexpr().unwrap()).unwrap(), &mut env).unwrap();
+        announce_output(OUTPUT_PROMPT);
+        user_print(val);
     }
 }
 
-fn prompt_for_input(str: &str) {}
+fn prompt_for_input(str: &str) {
+    println!("\n\n{}", str);
+}
 
-fn announce_output(str: &str) {}
+fn announce_output(str: &str) {
+    println!("\n{}", str);
+}
 
-fn user_print(obj: Value) {}
+fn user_print(obj: Value) {
+    print!("Value printed!");
+}
