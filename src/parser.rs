@@ -1,4 +1,4 @@
-use crate::lexer::{format_sexpr, Atom, Cons, Number, Sexpr, Symbol};
+use crate::lexer::{format_sexpr, Atom, Cons, Sexpr, Symbol};
 
 impl Sexpr {
     fn is_tagged_list(&self, tag: Symbol) -> bool {
@@ -14,12 +14,9 @@ impl Sexpr {
         }
     }
 
-    fn is_self_evalutaing(&self) -> bool {
+    fn is_self_evaluated(&self) -> bool {
         match &self {
-            Sexpr::Atom(a) => match a {
-                Atom::Number(_) | Atom::String(_) => true,
-                _ => false,
-            },
+            Sexpr::Atom(_) => true,
             _ => false,
         }
     }
@@ -69,13 +66,9 @@ impl Sexpr {
         }
     }
 
-    fn parse_self_evalutaing(self) -> Result<SelfEval, ()> {
+    fn parse_self_evaluated(self) -> Result<SelfEval, ()> {
         match self {
-            Sexpr::Atom(a) => match a {
-                Atom::Number(v) => Ok(SelfEval::Number(v)),
-                Atom::String(v) => Ok(SelfEval::String(v)),
-                _ => Err(()),
-            },
+            Sexpr::Atom(a) => Ok(a),
             _ => Err(()),
         }
     }
@@ -200,11 +193,7 @@ impl Sexpr {
     }
 }
 
-#[derive(Clone, Debug)]
-pub enum SelfEval {
-    Number(Number),
-    String(String),
-}
+pub type SelfEval = Atom;
 
 #[derive(Clone, Debug)]
 pub enum Expression {
@@ -221,8 +210,8 @@ pub enum Expression {
 }
 
 pub fn parse(sexpr: Sexpr) -> Result<Expression, String> {
-    if sexpr.is_self_evalutaing() {
-        Ok(Expression::SelfEval(sexpr.parse_self_evalutaing().unwrap()))
+    if sexpr.is_self_evaluated() {
+        Ok(Expression::SelfEval(sexpr.parse_self_evaluated().unwrap()))
     } else if sexpr.is_quoted() {
         Ok(Expression::Quoted(sexpr.parse_quoted().unwrap()))
     } else if sexpr.is_variable() {

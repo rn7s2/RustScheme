@@ -42,10 +42,7 @@ pub fn analyze(exp: Expression) -> Box<dyn FnOnce(&mut Env) -> Result<Value, ()>
 fn analyze_self_evaluated(
     v: SelfEval,
 ) -> Result<Box<dyn FnOnce(&mut Env) -> Result<Value, ()>>, ()> {
-    Ok(Box::new(|env| match v {
-        SelfEval::Number(n) => Ok(Value::Atom(Atom::Number(n))),
-        SelfEval::String(s) => Ok(Value::Atom(Atom::String(s))),
-    }))
+    Ok(Box::new(|env| Ok(Value::Atom(v))))
 }
 
 fn analyze_quoted(e: Sexpr) -> Result<Box<dyn FnOnce(&mut Env) -> Result<Value, ()>>, ()> {

@@ -54,30 +54,32 @@ pub fn format_sexpr(value: &Sexpr) -> String {
 }
 
 pub fn read_sexpr() -> Result<Sexpr, ()> {
-    Ok(Sexpr::Cons(Cons {
-        car: Box::new(Sexpr::Atom(Atom::Symbol(Symbol("define".to_owned())))),
-        cdr: Box::new(Sexpr::Cons(Cons {
-            car: Box::new(Sexpr::Atom(Atom::Symbol(Symbol("x".to_owned())))),
-            cdr: Box::new(Sexpr::Cons(Cons {
-                car: Box::new(Sexpr::Atom(Atom::Bool(Bool::False))),
-                cdr: Box::new(Sexpr::Atom(Atom::Null)),
-            })),
-        })),
-    }))
+    // Ok(Sexpr::Cons(Cons {
+    //     car: Box::new(Sexpr::Atom(Atom::Symbol(Symbol("define".to_owned())))),
+    //     cdr: Box::new(Sexpr::Cons(Cons {
+    //         car: Box::new(Sexpr::Atom(Atom::Symbol(Symbol("x".to_owned())))),
+    //         cdr: Box::new(Sexpr::Cons(Cons {
+    //             car: Box::new(Sexpr::Atom(Atom::Bool(Bool::False))),
+    //             cdr: Box::new(Sexpr::Atom(Atom::Null)),
+    //         })),
+    //     })),
+    // }))
+
+    Ok(Sexpr::Atom(Atom::Null))
 }
 
 pub fn lex(text: String) -> Result<Sexpr, String> {
     // for debugging
-    let sexpr = Sexpr::Cons(Cons {
-        car: Box::new(Sexpr::Atom(Atom::Symbol(Symbol("define".to_owned())))),
-        cdr: Box::new(Sexpr::Cons(Cons {
-            car: Box::new(Sexpr::Atom(Atom::Symbol(Symbol("x".to_owned())))),
-            cdr: Box::new(Sexpr::Cons(Cons {
-                car: Box::new(Sexpr::Atom(Atom::Bool(Bool::False))),
-                cdr: Box::new(Sexpr::Atom(Atom::Null)),
-            })),
-        })),
-    });
+    // let sexpr = Sexpr::Cons(Cons {
+    //     car: Box::new(Sexpr::Atom(Atom::Symbol(Symbol("define".to_owned())))),
+    //     cdr: Box::new(Sexpr::Cons(Cons {
+    //         car: Box::new(Sexpr::Atom(Atom::Symbol(Symbol("x".to_owned())))),
+    //         cdr: Box::new(Sexpr::Cons(Cons {
+    //             car: Box::new(Sexpr::Atom(Atom::Bool(Bool::False))),
+    //             cdr: Box::new(Sexpr::Atom(Atom::Null)),
+    //         })),
+    //     })),
+    // });
 
     // let sexpr = Sexpr::Cons(Cons {
     //     car: Box::new(Sexpr::Atom(Atom::Symbol(Symbol("f".to_owned())))),
@@ -86,6 +88,8 @@ pub fn lex(text: String) -> Result<Sexpr, String> {
     //         cdr: Box::new(Sexpr::Atom(Atom::Null)),
     //     })),
     // });
+
+    let sexpr = Sexpr::Atom(Atom::Null);
 
     println!("{}", format_sexpr(&sexpr));
     Ok(sexpr)
