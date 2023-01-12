@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::{
     analyzer::{analyze, Procedure, Value},
-    lexer::{Cons, Symbol},
+    lexer::{Atom, Cons, Symbol},
     parser::Expression,
 };
 
@@ -11,11 +11,22 @@ pub type Env = Vec<Frame>;
 pub const THE_EMPTY_ENV: Env = Vec::new();
 
 pub fn eval(exp: Expression, env: &mut Env) -> Result<Value, ()> {
-    analyze(exp).call_once((env,))
+    let (proc, param) = analyze(exp).unwrap();
+    proc(env, param)
 }
 
 pub fn apply(proc: Procedure, args: Cons) -> Result<Value, ()> {
-    todo!()
+    match proc {
+        Procedure::Primitive(p) => match p.as_str() {
+            "" => Ok(Value::Atom(Atom::Null)),
+            _ => Err(()),
+        },
+        Procedure::Compound(p) => {
+            // make a p.parameters -> args HashMap
+            // and call extend_env(, env) to generate a Env
+            // then applys accordingly.
+        }
+    }
 }
 
 pub fn define_variable(var: Symbol, val: Value, env: &mut Env) {

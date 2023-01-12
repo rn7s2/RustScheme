@@ -1,5 +1,3 @@
-#![feature(fn_traits)]
-
 mod analyzer;
 mod evaluator;
 mod lexer;
